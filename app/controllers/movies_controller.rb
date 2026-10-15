@@ -5,10 +5,13 @@ class MoviesController < ApplicationController
   def index
     @all_ratings = Movie.all_ratings
 
-    selected = params[:ratings]&.keys
-    @ratings_to_show = selected.presence || @all_ratings
+    if params[:ratings].present? || params[:sort_by].present?
+      session[:ratings] = params[:ratings]&.keys
+      session[:sort_by] = params[:sort_by]
+    end
 
-    @sort_by = %w[title release_date].include?(params[:sort_by]) ? params[:sort_by] : nil
+    @ratings_to_show = session[:ratings].presence || @all_ratings
+    @sort_by = %w[title release_date].include?(session[:sort_by]) ? session[:sort_by] : nil
 
     @movies = Movie.with_ratings(@ratings_to_show)
     @movies = @movies.order(@sort_by) if @sort_by
